@@ -11,6 +11,7 @@
 #include <string_view>
 #include <vector>
 
+#include "grenade_info.h"
 #include "hv/Event.h"
 #include "map.h"
 #include "message.h"
@@ -18,7 +19,7 @@
 #include "position.h"
 #include "safe_zone.h"
 #include "supply.h"
-#include "grenade_info.h"
+
 
 namespace thuai7_agent {
 

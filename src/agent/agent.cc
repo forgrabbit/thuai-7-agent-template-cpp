@@ -10,13 +10,14 @@
 #include <string>
 #include <string_view>
 
+#include "agent/grenade_info.h"
 #include "agent/map.h"
 #include "agent/message.h"
 #include "agent/player_info.h"
 #include "agent/position.h"
 #include "agent/supply.h"
-#include "agent/grenade_info.h"
 #include "message.h"
+
 
 namespace thuai7_agent {
 
@@ -48,9 +49,7 @@ auto Agent::IsConnected() const -> bool { return ws_client_->isConnected(); }
 
 void Agent::Disconnect() { ws_client_->close(); }
 
-auto Agent::IsGameReady() const -> bool {
-  return ticks_.has_value();
-}
+auto Agent::IsGameReady() const -> bool { return ticks_.has_value(); }
 
 void Agent::Abandon(SupplyKind target_supply, int count) {
   spdlog::debug("{}.Abandon({}, {})", *this, target_supply, count);
@@ -173,9 +172,9 @@ void Agent::OnMessage(Message const& message) {
       grenade_info_ = std::vector<GrenadeInfo>();
       for (auto const& msg_grenade : msg_dict["grenades"]) {
         auto throwTick = msg_grenade["throwTick"].get<int>();
-        Position<float> position{msg_grenade["evaluatedPosition"]["x"].get<float>(),
-                                 msg_grenade["evaluatedPosition"]["y"].get<float>()
-        };
+        Position<float> position{
+            msg_grenade["evaluatedPosition"]["x"].get<float>(),
+            msg_grenade["evaluatedPosition"]["y"].get<float>()};
 
         grenade_info_->emplace_back(GrenadeInfo{throwTick, position});
       }
