@@ -18,7 +18,6 @@
 #include "agent/supply.h"
 #include "message.h"
 
-
 namespace thuai7_agent {
 
 Agent::Agent(std::string_view token, hv::EventLoopPtr const& event_loop,

@@ -20,7 +20,6 @@
 #include "safe_zone.h"
 #include "supply.h"
 
-
 namespace thuai7_agent {
 
 class Agent {
