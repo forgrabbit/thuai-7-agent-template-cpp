@@ -42,7 +42,6 @@ Agent::~Agent() { event_loop_->killTimer(loop_timer_id_); }
 
 void Agent::Connect(std::string_view server_address) {
   ws_client_->open(server_address.data());
-  // std::this_thread::sleep_for(std::chrono::seconds(5));
 }
 
 auto Agent::IsConnected() const -> bool { return ws_client_->isConnected(); }
@@ -50,10 +49,7 @@ auto Agent::IsConnected() const -> bool { return ws_client_->isConnected(); }
 void Agent::Disconnect() { ws_client_->close(); }
 
 auto Agent::IsGameReady() const -> bool {
-  return all_player_info_.has_value() && map_.has_value() &&
-         supplies_.has_value() && safe_zone_.has_value() &&
-         self_id_.has_value() && ticks_.has_value() &&
-         grenade_info_.has_value();
+  return ticks_.has_value();
 }
 
 void Agent::Abandon(SupplyKind target_supply, int count) {
