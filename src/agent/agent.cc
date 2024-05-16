@@ -15,6 +15,7 @@
 #include "agent/player_info.h"
 #include "agent/position.h"
 #include "agent/supply.h"
+#include "agent/grenade_info.h"
 #include "message.h"
 
 namespace thuai7_agent {
@@ -51,7 +52,8 @@ void Agent::Disconnect() { ws_client_->close(); }
 auto Agent::IsGameReady() const -> bool {
   return all_player_info_.has_value() && map_.has_value() &&
          supplies_.has_value() && safe_zone_.has_value() &&
-         self_id_.has_value() && ticks_.has_value();
+         self_id_.has_value() && ticks_.has_value() &&
+         grenade_info_.has_value();
 }
 
 void Agent::Abandon(SupplyKind target_supply, int count) {
@@ -171,6 +173,16 @@ void Agent::OnMessage(Message const& message) {
       safe_zone_ = SafeZone{center, radius};
     } else if (msg_type == "PLAYER_ID") {
       self_id_ = msg_dict["playerId"].get<int>();
+    } else if (msg_type == "GRENADES") {
+      grenade_info_ = std::vector<GrenadeInfo>();
+      for (auto const& msg_grenade : msg_dict["grenades"]) {
+        auto throwTick = msg_grenade["throwTick"].get<int>();
+        Position<float> position{msg_grenade["evaluatedPosition"]["x"].get<float>(),
+                                 msg_grenade["evaluatedPosition"]["y"].get<float>()
+        };
+
+        grenade_info_->emplace_back(GrenadeInfo{throwTick, position});
+      }
     }
 
   } catch (std::exception const& e) {

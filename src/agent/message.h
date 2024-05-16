@@ -145,6 +145,13 @@ struct GetPlayerInfoMessage : public Message {
   }
 };
 
+struct GrenadeMessage : public Message {
+  explicit GrenadeMessage(const std::string& token) {
+    msg["messageType"] = "GRENADE_MESSAGE";
+    msg["token"] = token;
+  }
+};
+
 struct GetMapMessage : public Message {
   explicit GetMapMessage(const std::string& token) {
     msg["messageType"] = "GET_MAP";
