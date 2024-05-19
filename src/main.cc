@@ -6,6 +6,7 @@
 
 #include <cstdlib>
 #include <cxxopts.hpp>
+#include <exception>
 #include <optional>
 #include <string>
 
@@ -21,7 +22,7 @@ struct Options {
 
 constexpr auto kDefaultServer = "ws://localhost:14514";
 constexpr auto kDefaultToken = "1919810";
-constexpr auto kLoopInterval = 100;  // In milliseconds.
+constexpr auto kLoopInterval = 200;  // In milliseconds.
 
 auto ParseOptions(int argc, char** argv) -> std::optional<Options> {
   std::string server{kDefaultServer};
@@ -114,12 +115,29 @@ auto main(int argc, char* argv[]) -> int {
 
     // Setup agent if not done yet.
     if (!is_setup) {
-      Setup(agent);
-      spdlog::info("{} is setup", agent);
+      try {
+        Setup(agent);
+        spdlog::info("{} is setup", agent);
+
+      } catch (std::exception const& err) {
+        spdlog::error("an error occurred in Setup({}): {}", agent, err.what());
+#ifndef NDEBUG
+        throw;
+#endif
+      }
+
       is_setup = true;
     }
 
-    Loop(agent);
+    try {
+      Loop(agent);
+
+    } catch (std::exception const& err) {
+      spdlog::error("an error occurred in Loop({}): {}", agent, err.what());
+#ifndef NDEBUG
+      throw;
+#endif
+    }
   });
 
   event_loop->run();

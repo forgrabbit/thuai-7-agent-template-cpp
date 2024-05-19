@@ -10,6 +10,7 @@
 #include <string>
 #include <string_view>
 
+#include "agent/grenade_info.h"
 #include "agent/map.h"
 #include "agent/message.h"
 #include "agent/player_info.h"
@@ -51,7 +52,8 @@ void Agent::Disconnect() { ws_client_->close(); }
 auto Agent::IsGameReady() const -> bool {
   return all_player_info_.has_value() && map_.has_value() &&
          supplies_.has_value() && safe_zone_.has_value() &&
-         self_id_.has_value();
+         self_id_.has_value() && ticks_.has_value() &&
+         grenade_info_.has_value();
 }
 
 void Agent::Abandon(SupplyKind target_supply, int count) {
@@ -120,13 +122,19 @@ void Agent::OnMessage(Message const& message) {
       spdlog::error("{} got an error from server: {}", *this,
                     msg_dict["message"].get<std::string>());
     } else if (msg_type == "PLAYERS_INFO") {
+      ticks_ = msg_dict["elapsedTicks"].get<int>();
       all_player_info_ = std::vector<PlayerInfo>();
       for (auto const& data : msg_dict["players"]) {
         auto player_id = data["playerId"].get<int>();
         auto armor = data["armor"].get<ArmorKind>();
+        auto current_armor_health = data["current_armor_health"].get<float>();
         auto health = data["health"].get<int>();
         auto speed = data["speed"].get<float>();
         auto firearm = data["firearm"]["name"].get<FirearmKind>();
+        std::vector<FirearmKind> firearms_pool;
+        for (auto const& msg_firearm : data["firearms_pool"]) {
+          firearms_pool.emplace_back(msg_firearm["name"].get<FirearmKind>());
+        }
         auto range = data["firearm"]["distance"].get<float>();
         Position<float> position{data["position"]["x"].get<float>(),
                                  data["position"]["y"].get<float>()};
@@ -135,9 +143,9 @@ void Agent::OnMessage(Message const& message) {
           inventory.emplace_back(Item{msg_item["name"].get<ItemKind>(),
                                       msg_item["num"].get<int>()});
         }
-        all_player_info_->emplace_back(PlayerInfo{player_id, armor, health,
-                                                  speed, firearm, range,
-                                                  position, inventory});
+        all_player_info_->emplace_back(
+            PlayerInfo{player_id, armor, current_armor_health, health, speed,
+                       firearm, firearms_pool, range, position, inventory});
       }
     } else if (msg_type == "MAP") {
       auto length = msg_dict["length"].get<int>();
@@ -165,6 +173,16 @@ void Agent::OnMessage(Message const& message) {
       safe_zone_ = SafeZone{center, radius};
     } else if (msg_type == "PLAYER_ID") {
       self_id_ = msg_dict["playerId"].get<int>();
+    } else if (msg_type == "GRENADES") {
+      grenade_info_ = std::vector<GrenadeInfo>();
+      for (auto const& msg_grenade : msg_dict["grenades"]) {
+        auto throwTick = msg_grenade["throwTick"].get<int>();
+        Position<float> position{
+            msg_grenade["evaluatedPosition"]["x"].get<float>(),
+            msg_grenade["evaluatedPosition"]["y"].get<float>()};
+
+        grenade_info_->emplace_back(GrenadeInfo{throwTick, position});
+      }
     }
 
   } catch (std::exception const& e) {

@@ -99,10 +99,10 @@ static auto GetNeighbors(thuai7_agent::Map const& map,
                          thuai7_agent::Position<int> const& position)
     -> std::vector<thuai7_agent::Position<int>> {
   std::array<thuai7_agent::Position<int>, 4> neighbors{
-      thuai7_agent::Position<int>{position.x - 1, position.y},
-      thuai7_agent::Position<int>{position.x + 1, position.y},
       thuai7_agent::Position<int>{position.x, position.y - 1},
+      thuai7_agent::Position<int>{position.x + 1, position.y},
       thuai7_agent::Position<int>{position.x, position.y + 1},
+      thuai7_agent::Position<int>{position.x - 1, position.y},
   };
 
   std::vector<thuai7_agent::Position<int>> valid_neighbors;

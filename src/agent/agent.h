@@ -11,6 +11,7 @@
 #include <string_view>
 #include <vector>
 
+#include "grenade_info.h"
 #include "hv/Event.h"
 #include "map.h"
 #include "message.h"
@@ -64,7 +65,14 @@ class Agent {
     return safe_zone_;
   }
 
+  [[nodiscard]] auto grenade_info() const
+      -> std::optional<std::reference_wrapper<std::vector<GrenadeInfo> const>> {
+    return grenade_info_;
+  }
+
   [[nodiscard]] auto self_id() const -> std::optional<int> { return self_id_; }
+
+  [[nodiscard]] auto ticks() const -> std::optional<int> { return ticks_; }
 
   [[nodiscard]] auto IsGameReady() const -> bool;
 
@@ -98,7 +106,9 @@ class Agent {
   std::optional<Map> map_;
   std::optional<std::vector<Supply>> supplies_;
   std::optional<SafeZone> safe_zone_;
+  std::optional<std::vector<GrenadeInfo>> grenade_info_;
   std::optional<int> self_id_;
+  std::optional<int> ticks_;
   std::string token_;
 };
 

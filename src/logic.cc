@@ -6,6 +6,7 @@
 #include "agent/agent.h"
 #include "agent/position.h"
 #include "path_finding.h"
+#include "shot_check.h"
 
 constexpr auto kFloatPositionShift = 0.5;
 
@@ -28,7 +29,8 @@ void Loop(thuai7_agent::Agent& agent) {
   auto const& player_info_list = agent.all_player_info().value().get();
   auto const self_id = agent.self_id().value();
   auto const& self_info = player_info_list.at(self_id);
-  auto const& opponent_info = player_info_list.at(1 - self_info.id);
+  auto const& opponent_info =
+      player_info_list.at((self_info.id + 1) % player_info_list.size());
 
   auto const& map = agent.map().value().get();
 
@@ -69,5 +71,8 @@ void Loop(thuai7_agent::Agent& agent) {
     return;
   }
 
-  agent.Attack(opponent_info.position);
+  if (CheckShotFeasible(map, self_info.position, opponent_info.position,
+                        self_info.range)) {
+    agent.Attack(opponent_info.position);
+  }
 }

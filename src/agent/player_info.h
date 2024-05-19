@@ -15,6 +15,7 @@ enum class ArmorKind {
 };
 
 enum class FirearmKind {
+  kFist,
   kAwm,
   kM16,
   kS686,
@@ -41,9 +42,11 @@ struct Item {
 struct PlayerInfo {
   int id;
   ArmorKind armor;
+  float current_armor_health;
   int health;
   float speed;
   FirearmKind firearm;
+  std::vector<FirearmKind> firearms_pool;
   float range;
   Position<float> position;
   std::vector<Item> inventory;

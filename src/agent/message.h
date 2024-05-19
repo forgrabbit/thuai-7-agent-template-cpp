@@ -34,6 +34,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(ItemKind, {
                                        });
 
 NLOHMANN_JSON_SERIALIZE_ENUM(FirearmKind, {
+                                              {FirearmKind::kFist, "FIST"},
                                               {FirearmKind::kS686, "S686"},
                                               {FirearmKind::kVector, "VECTOR"},
                                               {FirearmKind::kAwm, "AWM"},
@@ -140,6 +141,13 @@ struct PerformAttackMessage : public Message {
 struct GetPlayerInfoMessage : public Message {
   explicit GetPlayerInfoMessage(const std::string& token) {
     msg["messageType"] = "GET_PLAYER_INFO";
+    msg["token"] = token;
+  }
+};
+
+struct GrenadeMessage : public Message {
+  explicit GrenadeMessage(const std::string& token) {
+    msg["messageType"] = "GRENADE_MESSAGE";
     msg["token"] = token;
   }
 };
